@@ -1,0 +1,2283 @@
+{
+	"info": {
+		"_postman_id": "be815492-472b-4aab-b2b8-d658de699b60",
+		"name": "Google Gemini API - Comprehensive (v1beta)",
+		"description": "A comprehensive Postman collection for interacting with the Google Gemini API (v1beta).\n\n**Features:**\n\n*   Covers major API resources: Models, Files, Tuned Models, Corpora (Semantic Search), Cached Content.\n*   Includes examples for text generation, chat, vision (image/video input), embeddings, file uploads, fine-tuning management, semantic search, and more.\n*   Structured logically based on the official API documentation.\n*   Uses Postman variables for base URL, version, model names, and resource IDs.\n*   Configured for easy authentication using a Postman Vault variable.\n\n**Getting Started:**\n\n1.  **Fork this Collection:** Click the 'Fork' button to copy this collection to your workspace.\n2.  **Get API Key:** Obtain your API key from Google AI Studio: [https://aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey)\n3.  **Store API Key:** Store your key in Postman Vault ([Learn More](https://learning.postman.com/docs/sending-requests/postman-vault/postman-vault-secrets/)). Name the secret `geminiApiKey`.\n4.  **Select Environment (Optional):** While not strictly required as auth is collection-level, you can create environments for different settings.\n5.  **Explore Requests:** Start exploring the folders and requests. Read the descriptions for each request to understand its purpose and parameters.\n\n**Note:** This collection focuses on the `v1beta` API version. Some features might be experimental or subject to change.\n\n**Official Documentation:** [https://ai.google.dev/api/rest](https://ai.google.dev/api/rest)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32661048",
+		"_collection_link": "https://www.postman.com/revanthchrixtopher/gemini-api/collection/32661048-be815492-472b-4aab-b2b8-d658de699b60?action=share&source=collection_link&creator=32661048"
+	},
+	"item": [
+		{
+			"name": "Models API",
+			"item": [
+				{
+					"name": "List Models",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/models",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"models"
+							]
+						},
+						"description": "Lists the Models available through the Gemini API that are compatible with the API key.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/models/list](https://ai.google.dev/api/rest/v1beta/models/list)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Model Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/models/{{model}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"models",
+								"{{model}}"
+							]
+						},
+						"description": "Gets information about a specific Model, such as its version, display name, input/output token limits, and supported generation methods.\n\nUses the `{{model}}` collection variable. Change this variable to query different models (e.g., `gemini-1.5-flash-latest`, `gemini-1.5-pro-latest`, `text-embedding-004`).\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/models/get](https://ai.google.dev/api/rest/v1beta/models/get)"
+					},
+					"response": []
+				},
+				{
+					"name": "Text Generation (generateContent)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contents\": [\n    {\n      \"parts\":[\n        {\"text\": \"Write a short story about a futuristic city powered by algae.\"}\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.7,\n    \"topK\": 1,\n    \"topP\": 1,\n    \"maxOutputTokens\": 512,\n    \"stopSequences\": []\n  },\n  \"safetySettings\": [\n    {\n      \"category\": \"HARM_CATEGORY_HARASSMENT\",\n      \"threshold\": \"BLOCK_MEDIUM_AND_ABOVE\"\n    },\n    {\n      \"category\": \"HARM_CATEGORY_HATE_SPEECH\",\n      \"threshold\": \"BLOCK_MEDIUM_AND_ABOVE\"\n    },\n    {\n      \"category\": \"HARM_CATEGORY_SEXUALLY_EXPLICIT\",\n      \"threshold\": \"BLOCK_MEDIUM_AND_ABOVE\"\n    },\n    {\n      \"category\": \"HARM_CATEGORY_DANGEROUS_CONTENT\",\n      \"threshold\": \"BLOCK_MEDIUM_AND_ABOVE\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/models/{{model}}:generateContent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"models",
+								"{{model}}:generateContent"
+							]
+						},
+						"description": "Generates a response from the model given a simple text input.\n\n*   Uses the `{{model}}` collection variable.\n*   Adjust `generationConfig` (temperature, topK, topP, maxOutputTokens) to control the output.\n*   Adjust `safetySettings` to control content filtering.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/models/generateContent](https://ai.google.dev/api/rest/v1beta/models/generateContent)"
+					},
+					"response": []
+				},
+				{
+					"name": "Chat (generateContent - Multiturn)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\"text\": \"What is the weather like in London today?\"}\n      ]\n    },\n    {\n      \"role\": \"model\",\n      \"parts\": [\n        {\"text\": \"The weather in London today is partly cloudy with a high of 15°C and a low of 8°C.\"}\n      ]\n    },\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\"text\": \"What should I wear?\"}\n      ]\n    }\n  ],\n   \"generationConfig\": {\n    \"temperature\": 0.7,\n    \"maxOutputTokens\": 256\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/models/{{model}}:generateContent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"models",
+								"{{model}}:generateContent"
+							]
+						},
+						"description": "Generates a response in a conversational (chat) context by providing the history of the conversation in the `contents` array.\n\n*   Each object in `contents` represents a turn, with a `role` (`user` or `model`) and `parts`.\n*   The last turn should be from the `user`.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/models/generateContent](https://ai.google.dev/api/rest/v1beta/models/generateContent)"
+					},
+					"response": []
+				},
+				{
+					"name": "Vision (generateContent - Image Input)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contents\":[\n    {\n      \"parts\":[\n        {\"text\": \"Describe this image:\"},\n        {\n          \"inline_data\": {\n            \"mime_type\":\"image/jpeg\",\n            \"data\": \"/9j/4AAQSkZJRgABAQEASABIAAD/4gxYSUNDX1BST0ZJTEUAAQEAAAxITGlubwIQAABtbnRyUkdCIFhZWiAHzgACAAkABgAxAABhY3NwTVNGVAAAAABJRUMgc1JHQgAAAAAAAAAAAAAAAAAA9tYAAQAAAADTLUhQICAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABFjcHJ0AAABUAAAADNkZXNjAAABhAAAAGx3dHB0AAAB8AAAABRia3B0AAACBAAAABRyWFlaAAACGAAAABRnWFlaAAACLAAAABRiWFlaAAACQAAAABRkbW5kAAACVAAAAHBkbWRkAAACxAAAAIh2dWVkAAADTAAAA3h2aWV3AAADiAAAACRhbHVtAAADsAAAABRnYW1hAAADwAAAABRjaGFkAAAD2AAAACxtbW9kAAAD+AAAACh2Y2d0AAAEEAAAAAw=/8AAEQgAgACAAwEiAAIRAQMRAf/EABwAAQEBAQEBAQEBAAAAAAAAAAECBQMGBwQDCP/EADIQAAEDAgMHAgMJAAAAAAAAAAECAwQFEQYSIUEHEzFRYSJxgZHR8BQiMhUkU7FTYnL/2gAMAwEAAhEDEQA/AN7iS4kNIVJeQ0FHKEo5lR7ADmewGIJ8+kw48OSiM26l51PMLTKC6j/uQDkPc4k0+LIlzHXZKStxpQQhR5+WOSlW7WOUH0OKlRoMOEwXIzTjSkqAzMrWgKBNrHKRb0v3wM3U0s4K2H21kJuQhQUkXHUEcfTA5vEGO6+uK1JeVIbvlWy0pLgFtQUkXI9xiPTqfGgyHVNNuNMuJBwy4taUJ7gKUQPQkYq0iDGgyHZDLLjLLiCEhtxaAlR3vlNufwBgbE11t1AcbUFoVuFA3Bx6MR6cw2y6/IaSUOPIQFlRuVEZrr9+Yj/84zAYTAYTAYTEoMAhMI/e4MExKBj/Lw28tDraXG1ZkKG4OCM4M49938R5+XwM3V202p1tppTjqghCRcqUbACMUqRFckSXHX0lx1xaUpUrclIy5QOwAAt8cRKrGlT3ktNqaajNkKUVAlxw9wOw+d8MVKjTZq22WltMxWzzLUkqU4e1yOW/b5YHMaDTosNguRmXGlKUMzK1rCVG+5ypQB9BiVSIMaDIcksMuMsOJCQhtxaAlW+98pv8A4yYgUqNNmuoaabaYits+YpQSpxftcjl+fXCtGgQ4TBejMuNKUoZmVrWEqN+hIsfQkYG0xGpcFMJksoUVkqK1LPNa1HcqcPqB6AYyYTEoMBhMJhMJiUGDGxG/uP+mY+3r7e/iPPy+BjAYTAYTAYTAYTAYTAYTAYTEoMAhMZjEY/y8NPLQ62lxpWZCxuDgDMZjH938Q6fL4GMJhMJhMJhMBhMJhMBhMJhMJhMBhMJiUGAQmExKBj/Lw28tDraXG1ZkKG4OPEZjH938Q6fL4GMJhMJhMJhMBhMJhMBhMJhMJhMBhMJiUGAQmExKBj/AC8NPLQ62lxpWZChcDgx6MR6ahtl1+Q0kocdQlJWo3KgM1v35iP/AM4zAYTAYTAYTAYTAYTAYTAYTAYTEoMAhMI/e4MExKBj/Lw28tDraXG1ZkKG4OCM4M49938R5+XwMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZiUGAxmMxiMf5eGnlodZS42rMhY5gcH5GMxmMcXd/EOny+BjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZjMZiUGAxmMxiMf5eGnlodZS42rMhY5gf/Z\"\n          }\n        }\n      ]\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/models/{{model}}:generateContent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"models",
+								"{{model}}:generateContent"
+							]
+						},
+						"description": "Generates a response based on text and image input.\n\n*   The `contents` array should contain parts for both text and image data.\n*   Image data must be Base64 encoded.\n*   **Important:** Remove the metadata prefix (e.g., `data:image/jpeg;base64,`) from the Base64 string before pasting it into the `\"data\"` field.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/models/generateContent](https://ai.google.dev/api/rest/v1beta/models/generateContent)"
+					},
+					"response": []
+				},
+				{
+					"name": "Vision (generateContent - Video Input)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// This script assumes you have uploaded a video file",
+									"// using the 'Files API' requests and stored its URI",
+									"// in the 'fileUri' collection variable.",
+									"",
+									"const fileUri = pm.collectionVariables.get(\"fileUri\");",
+									"",
+									"if (!fileUri) {",
+									"    console.warn(\"Please upload a video file first using the 'Files API' folder and ensure the 'fileUri' variable is set.\");",
+									"    // Optionally stop the request if no URI is set",
+									"    // postman.setNextRequest(null); ",
+									"}",
+									"",
+									"const requestBody = {",
+									"  \"contents\":[",
+									"    {",
+									"      \"parts\":[",
+									"        {\"text\": \"Describe this video:\"},",
+									"        {",
+									"          \"file_data\": {",
+									"            \"mime_type\": \"video/mp4\", // Adjust mime_type if needed",
+									"            \"file_uri\": fileUri ",
+									"          }",
+									"        }",
+									"      ]",
+									"    }",
+									"  ]",
+									"};",
+									"",
+									"pm.request.body.raw = JSON.stringify(requestBody);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has candidates\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.candidates).to.be.an('array').that.is.not.empty;",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "// Body is set by the pre-request script",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/models/gemini-1.5-pro-latest:generateContent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"models",
+								"gemini-1.5-pro-latest:generateContent"
+							]
+						},
+						"description": "Generates a response based on text and video input.\n\n**Prerequisites:**\n\n1.  Use the 'Files API' requests in this collection to upload your video file.\n2.  Ensure the `fileUri` collection variable is correctly set with the URI from the upload response.\n3.  **Note:** This example specifically uses `gemini-1.5-pro-latest` as video processing is more demanding.\n\n*   The `contents` array should contain parts for both text and `file_data`.\n*   The `file_data` part references the uploaded video using its `file_uri`.\n*   Make sure the `mime_type` in the request body matches your uploaded video's type (e.g., `video/mp4`, `video/mpeg`, etc.).\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/models/generateContent](https://ai.google.dev/api/rest/v1beta/models/generateContent)"
+					},
+					"response": []
+				},
+				{
+					"name": "Streaming Text (streamGenerateContent)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contents\": [\n    {\n      \"parts\":[\n        {\"text\": \"Tell me a long bedtime story about a friendly dragon.\"}\n      ]\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/models/{{model}}:streamGenerateContent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"models",
+								"{{model}}:streamGenerateContent"
+							]
+						},
+						"description": "Generates a response stream from the model given an input.\n\nThe response body will be a stream of JSON objects, each representing a chunk of the generated content. This is useful for long responses or real-time interactions.\n\n**Note:** Postman's standard response view might not render streams perfectly. You might need to observe the raw response or use client libraries in code for optimal stream handling.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/models/streamGenerateContent](https://ai.google.dev/api/rest/v1beta/models/streamGenerateContent)"
+					},
+					"response": []
+				},
+				{
+					"name": "Count Tokens",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contents\": [\n    {\n      \"parts\":[\n        {\"text\": \"How many tokens are in this sentence?\"}\n      ]\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/models/{{model}}:countTokens",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"models",
+								"{{model}}:countTokens"
+							]
+						},
+						"description": "Runs the model's tokenizer on the input content and returns the total number of tokens.\n\nUseful for understanding and managing token limits and costs.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/models/countTokens](https://ai.google.dev/api/rest/v1beta/models/countTokens)"
+					},
+					"response": []
+				},
+				{
+					"name": "Embed Content",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"content\": {\n    \"parts\":[\n      {\"text\": \"Generate an embedding for this text.\"}\n      ]\n    },\n  \"task_type\": \"RETRIEVAL_DOCUMENT\",\n  \"title\": \"Optional Document Title\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/models/{{embeddingModel}}:embedContent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"models",
+								"{{embeddingModel}}:embedContent"
+							]
+						},
+						"description": "Generates a text embedding (vector representation) for the input content using the specified embedding model.\n\n*   Uses the `{{embeddingModel}}` collection variable (e.g., `text-embedding-004`).\n*   Specify the `task_type` based on your downstream use case for potentially better results (e.g., RETRIEVAL_DOCUMENT, RETRIEVAL_QUERY, SEMANTIC_SIMILARITY, CLASSIFICATION, CLUSTERING).\n*   The `title` is optional but recommended for `RETRIEVAL_DOCUMENT` task type.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/models/embedContent](https://ai.google.dev/api/rest/v1beta/models/embedContent)"
+					},
+					"response": []
+				},
+				{
+					"name": "Batch Embed Content",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"requests\": [\n    {\n      \"content\": { \"parts\":[ {\"text\": \"Embed this first sentence.\"} ]},\n      \"task_type\": \"RETRIEVAL_DOCUMENT\",\n      \"title\": \"Doc 1\"\n    },\n    {\n      \"content\": { \"parts\":[ {\"text\": \"Embedding the second sentence here.\"} ]},\n      \"task_type\": \"RETRIEVAL_DOCUMENT\",\n      \"title\": \"Doc 2\"\n    },\n     {\n      \"content\": { \"parts\":[ {\"text\": \"And a third one for good measure.\"} ]},\n      \"task_type\": \"RETRIEVAL_DOCUMENT\",\n      \"title\": \"Doc 3\"\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/models/{{embeddingModel}}:batchEmbedContents",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"models",
+								"{{embeddingModel}}:batchEmbedContents"
+							]
+						},
+						"description": "Generates embeddings for multiple input contents in a single request.\n\n*   Uses the `{{embeddingModel}}` collection variable.\n*   Provide a list of embedding requests in the `requests` array.\n*   Each request object within the array follows the same structure as the single `embedContent` request.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/models/batchEmbedContents](https://ai.google.dev/api/rest/v1beta/models/batchEmbedContents)"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Grounded Answer (Attributed Question Answering)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contents\": [\n    {\n      \"parts\": [\n        {\n          \"text\": \"What is the meaning of life according to the provided corpus?\"\n        }\n      ]\n    }\n  ],\n  \"answerStyle\": \"ABSTRACTIVE\",\n  \"groundingConfig\": {\n    \"sources\": [\n      {\n        \"corpus\": \"corpora/{{corpusName}}\"\n      }\n    ]\n  },\n  \"temperature\": 0.7\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/models/{{aqaModel}}:generateAnswer",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"models",
+								"{{aqaModel}}:generateAnswer"
+							]
+						},
+						"description": "Generates an answer grounded in provided sources (Attributed Question Answering).\n\n**Note:** Requires the `gemini-1.5-flash-aqa` or `gemini-1.5-pro-aqa` model (set in `{{aqaModel}}` variable) and a configured Corpus (use the 'Semantic Search (Corpora API)' folder to create one and set `{{corpusName}}`).\n\n*   `answerStyle` controls how the answer is generated (e.g., ABSTRACTIVE, EXTRACTIVE, VERBOSE).\n*   `groundingConfig` specifies the data source(s) for grounding.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/models/generateAnswer](https://ai.google.dev/api/rest/v1beta/models/generateAnswer)"
+					},
+					"response": []
+				}
+			],
+			"description": "Interact with available Gemini models for generation, embeddings, and information."
+		},
+		{
+			"name": "Files API",
+			"item": [
+				{
+					"name": "01 - Start Resumable Upload",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Capture the upload URL for the next step",
+									"var uploadUrl = pm.response.headers.get('x-goog-upload-url');",
+									"if (uploadUrl) {",
+									"    pm.collectionVariables.set(\"uploadUrl\", uploadUrl);",
+									"    console.log(\"Upload URL set:\", uploadUrl);",
+									"} else {",
+									"    console.error(\"Failed to get upload URL from headers.\");",
+									"}",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains Upload URL header\", function () {",
+									"    pm.response.to.have.header(\"X-Goog-Upload-URL\");",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Goog-Upload-Protocol",
+								"value": "resumable"
+							},
+							{
+								"key": "X-Goog-Upload-Command",
+								"value": "start"
+							},
+							{
+								"key": "X-Goog-Upload-Header-Content-Type",
+								"value": "image/jpeg"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"file\": {\n        \"display_name\": \"my-uploaded-image.jpg\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/upload/{{version}}/files",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"upload",
+								"{{version}}",
+								"files"
+							]
+						},
+						"description": "Initiates a resumable file upload session.\n\n1.  **Set `X-Goog-Upload-Header-Content-Type`:** Update this header to match the MIME type of the file you will upload in the next step (e.g., image/png, video/mp4, application/pdf).\n2.  **Run Request:** Send this request.\n3.  **Check Variables:** The test script will automatically capture the unique upload URL returned in the `x-goog-upload-url` response header and save it to the `{{uploadUrl}}` collection variable for the next request.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/media/upload](https://ai.google.dev/api/rest/v1beta/media/upload)"
+					},
+					"response": []
+				},
+				{
+					"name": "02 - Upload File Data",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Capture the File URI and File ID after successful upload",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"try {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData && jsonData.file && jsonData.file.uri) {",
+									"        pm.collectionVariables.set(\"fileUri\", jsonData.file.uri);",
+									"        console.log(\"File URI set:\", jsonData.file.uri);",
+									"        ",
+									"         // Extract File ID from the name (e.g., files/xxxx)",
+									"        if (jsonData.file.name) {",
+									"            const parts = jsonData.file.name.split('/');",
+									"            if (parts.length === 2) {",
+									"                 pm.collectionVariables.set(\"fileId\", parts[1]);",
+									"                 console.log(\"File ID set:\", parts[1]);",
+									"            }",
+									"        }",
+									"        ",
+									"        pm.test(\"File URI captured\", function() {",
+									"            pm.expect(jsonData.file.uri).to.be.a('string').and.not.empty;",
+									"        });",
+									"    } else {",
+									"         pm.test(\"File URI not found in response\", function() {",
+									"            pm.expect.fail(\"File URI missing from response JSON\");",
+									"        });",
+									"    }",
+									"} catch (e) {",
+									"    console.error(\"Error processing upload response:\", e);",
+									"    pm.test(\"Response JSON processing failed\", function() {",
+									"       pm.expect.fail(\"Could not parse response or find file URI\");",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Goog-Upload-Command",
+								"value": "upload, finalize"
+							},
+							{
+								"key": "X-Goog-Upload-Offset",
+								"value": "0"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/octet-stream"
+							}
+						],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": ""
+							}
+						},
+						"url": {
+							"raw": "{{uploadUrl}}",
+							"host": [
+								"{{uploadUrl}}"
+							]
+						},
+						"description": "Uploads the actual file data to the session initiated previously.\n\n1.  **Run Step 01 First:** Make sure you have successfully run the \"01 - Start Resumable Upload\" request to get the `{{uploadUrl}}`.\n2.  **Select File:** Go to the 'Body' tab for this request, ensure 'binary' or 'file' mode is selected, and choose the local file you want to upload.\n3.  **Run Request:** Send the request.\n4.  **Check Variables:** The test script will attempt to parse the response and save the `fileUri` and `fileId` collection variables upon success.\n\n**Note:** For very large files, resumable uploads allow sending data in multiple chunks by adjusting the `X-Goog-Upload-Offset` and omitting `finalize` from the command until the last chunk. This example shows a single chunk upload.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/media/upload](https://ai.google.dev/api/rest/v1beta/media/upload)"
+					},
+					"response": []
+				},
+				{
+					"name": "List Files",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/files?pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"files"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "10",
+									"description": "(Optional) Max number of files to return."
+								},
+								{
+									"key": "pageToken",
+									"value": "{{nextPageToken}}",
+									"description": "(Optional) Token for pagination.",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Lists the metadata for Files owned by the requesting project.\n\nSupports pagination using `pageSize` and `pageToken`.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/files/list](https://ai.google.dev/api/rest/v1beta/files/list)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get File Metadata",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/files/{{fileId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"files",
+								"{{fileId}}"
+							]
+						},
+						"description": "Gets the metadata for a specific File using its ID.\n\nEnsure the `{{fileId}}` collection variable is set (e.g., from the 'Upload File Data' or 'List Files' response).\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/files/get](https://ai.google.dev/api/rest/v1beta/files/get)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete File",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/files/{{fileId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"files",
+								"{{fileId}}"
+							]
+						},
+						"description": "Deletes a specific File using its ID.\n\nEnsure the `{{fileId}}` collection variable is set.\n**Caution:** This action is irreversible.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/files/delete](https://ai.google.dev/api/rest/v1beta/files/delete)"
+					},
+					"response": []
+				}
+			],
+			"description": "Upload and manage files (images, videos, audio, PDFs) for use with multimodal models."
+		},
+		{
+			"name": "Tuned Models API",
+			"item": [
+				{
+					"name": "Permissions (Tuned Models)",
+					"item": [
+						{
+							"name": "List Permissions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/tunedModels/{{tunedModelName}}/permissions?pageSize=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"tunedModels",
+										"{{tunedModelName}}",
+										"permissions"
+									],
+									"query": [
+										{
+											"key": "pageSize",
+											"value": "10"
+										}
+									]
+								},
+								"description": "Lists permissions for a specific tuned model.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels.permissions/list](https://ai.google.dev/api/rest/v1beta/tunedModels.permissions/list)"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Permission",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"grantee_type\": \"EVERYONE\", \n  \"role\": \"READER\" \n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/tunedModels/{{tunedModelName}}/permissions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"tunedModels",
+										"{{tunedModelName}}",
+										"permissions"
+									]
+								},
+								"description": "Creates a permission for a specific tuned model.\n\n*   `grantee_type`: Who gets the permission (`EVERYONE`, `USER`, `GROUP`).\n*   `role`: What they can do (`READER` or `WRITER`).\n*   `email_address`: Required for `USER` or `GROUP` types (add if needed).\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels.permissions/create](https://ai.google.dev/api/rest/v1beta/tunedModels.permissions/create)"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Permission",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/tunedModels/{{tunedModelName}}/permissions/{{permissionId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"tunedModels",
+										"{{tunedModelName}}",
+										"permissions",
+										"{{permissionId}}"
+									]
+								},
+								"description": "Gets details about a specific permission on a tuned model.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels.permissions/get](https://ai.google.dev/api/rest/v1beta/tunedModels.permissions/get)"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Permission",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"role\": \"WRITER\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/tunedModels/{{tunedModelName}}/permissions/{{permissionId}}?updateMask=role",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"tunedModels",
+										"{{tunedModelName}}",
+										"permissions",
+										"{{permissionId}}"
+									],
+									"query": [
+										{
+											"key": "updateMask",
+											"value": "role",
+											"description": "Specify the field being updated (only 'role' is updatable)."
+										}
+									]
+								},
+								"description": "Updates the role of an existing permission.\n\nOnly the `role` field can be updated.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels.permissions/patch](https://ai.google.dev/api/rest/v1beta/tunedModels.permissions/patch)"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Permission",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/tunedModels/{{tunedModelName}}/permissions/{{permissionId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"tunedModels",
+										"{{tunedModelName}}",
+										"permissions",
+										"{{permissionId}}"
+									]
+								},
+								"description": "Deletes a specific permission from a tuned model.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels.permissions/delete](https://ai.google.dev/api/rest/v1beta/tunedModels.permissions/delete)"
+							},
+							"response": []
+						}
+					],
+					"description": "Manage access permissions for tuned models."
+				},
+				{
+					"name": "List Tuned Models",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/tunedModels?pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"tunedModels"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "10"
+								},
+								{
+									"key": "pageToken",
+									"value": "",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Lists the tuned models owned by the user.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels/list](https://ai.google.dev/api/rest/v1beta/tunedModels/list)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Tuned Model (Example Body)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"display_name\": \"My First Tuned Model\",\n  \"description\": \"A model tuned for classifying sentiment\",\n  \"base_model\": \"models/gemini-1.5-flash-latest\",\n  \"tuning_task\": {\n    \"training_data\": {\n       \"examples\": {\n         \"examples\": [\n            {\n               \"text_input\": \"- What a beautiful day!\",\n               \"output\": \"Positive\"\n            },\n            {\n               \"text_input\": \"- I'm feeling quite sad today.\",\n               \"output\": \"Negative\"\n            },\n             {\n               \"text_input\": \"- The weather is okay.\",\n               \"output\": \"Neutral\"\n            }\n          ]\n       } \n    },\n    \"hyperparameters\": {\n         \"batch_size\": 4,\n         \"learning_rate\": 0.001,\n         \"epoch_count\": 5\n    }\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/tunedModels",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"tunedModels"
+							]
+						},
+						"description": "Starts the process of creating a tuned model.\n\n*   Specify a `display_name` and optional `description`.\n*   Set the `base_model` (must be a tunable model like `gemini-1.0-pro-001` or specific versions).\n*   Provide `training_data` inline (as shown) or via a file URI.\n    *   The structure of examples depends on the tuning task.\n*   Adjust `hyperparameters` as needed.\n\n**Note:** Tuning can take significant time and incur costs. Refer to the official documentation for detailed requirements and best practices.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels/create](https://ai.google.dev/api/rest/v1beta/tunedModels/create)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Tuned Model",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/tunedModels/{{tunedModelName}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"tunedModels",
+								"{{tunedModelName}}"
+							]
+						},
+						"description": "Gets information about a specific tuned model, including its status (creating, active, failed).\n\nEnsure `{{tunedModelName}}` variable is set.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels/get](https://ai.google.dev/api/rest/v1beta/tunedModels/get)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Tuned Model",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"display_name\": \"My Updated Tuned Model Name\",\n    \"description\": \"Updated description for my tuned model.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/tunedModels/{{tunedModelName}}?updateMask=display_name,description",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"tunedModels",
+								"{{tunedModelName}}"
+							],
+							"query": [
+								{
+									"key": "updateMask",
+									"value": "display_name,description",
+									"description": "Comma-separated list of fields to update."
+								}
+							]
+						},
+						"description": "Updates the mutable fields (like `display_name`, `description`) of a tuned model.\n\nUse the `updateMask` query parameter to specify which fields are being updated.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels/patch](https://ai.google.dev/api/rest/v1beta/tunedModels/patch)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Tuned Model",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/tunedModels/{{tunedModelName}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"tunedModels",
+								"{{tunedModelName}}"
+							]
+						},
+						"description": "Deletes a specific tuned model.\n\n**Caution:** This is irreversible.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels/delete](https://ai.google.dev/api/rest/v1beta/tunedModels/delete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Content (Tuned Model)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contents\": [\n    {\n      \"parts\":[\n        {\"text\": \"- This movie was terrible.\"}\n      ]\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/tunedModels/{{tunedModelName}}:generateContent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"tunedModels",
+								"{{tunedModelName}}:generateContent"
+							]
+						},
+						"description": "Generates a response using a specific tuned model.\n\nThe request body structure is the same as generating content with a base model, but the URL points to your tuned model.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels/generateContent](https://ai.google.dev/api/rest/v1beta/tunedModels/generateContent)"
+					},
+					"response": []
+				},
+				{
+					"name": "Stream Generate Content (Tuned Model)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"contents\": [\n    {\n      \"parts\":[\n        {\"text\": \"Write a product description based on my tuned data.\"}\n      ]\n    }\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/tunedModels/{{tunedModelName}}:streamGenerateContent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"tunedModels",
+								"{{tunedModelName}}:streamGenerateContent"
+							]
+						},
+						"description": "Generates a streamed response using a specific tuned model.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels/streamGenerateContent](https://ai.google.dev/api/rest/v1beta/tunedModels/streamGenerateContent)"
+					},
+					"response": []
+				},
+				{
+					"name": "Transfer Ownership",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email_address\": \"new-owner@example.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/tunedModels/{{tunedModelName}}:transferOwnership",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"tunedModels",
+								"{{tunedModelName}}:transferOwnership"
+							]
+						},
+						"description": "Transfers ownership of the tuned model to another user.\n\n**Note:** Requires appropriate permissions.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/tunedModels/transferOwnership](https://ai.google.dev/api/rest/v1beta/tunedModels/transferOwnership)"
+					},
+					"response": []
+				}
+			],
+			"description": "Create, manage, and use fine-tuned models (requires allowlisting/availability)."
+		},
+		{
+			"name": "Semantic Search (Corpora API)",
+			"item": [
+				{
+					"name": "Corpora",
+					"item": [
+						{
+							"name": "List Corpora",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora?pageSize=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora"
+									],
+									"query": [
+										{
+											"key": "pageSize",
+											"value": "10"
+										}
+									]
+								},
+								"description": "Lists all Corpora owned by the user.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora/list](https://ai.google.dev/api/rest/v1beta/corpora/list)"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Corpus",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Extract corpus name for subsequent requests",
+											"try {",
+											"    const jsonData = pm.response.json();",
+											"    if (jsonData && jsonData.name) {",
+											"        const parts = jsonData.name.split('/'); // name is like 'corpora/corpus-id'",
+											"        if (parts.length === 2) {",
+											"            pm.collectionVariables.set(\"corpusName\", parts[1]);",
+											"            console.log(\"corpusName variable set to:\", parts[1]);",
+											"             pm.test(\"Corpus Name Captured\", function() {",
+											"                 pm.expect(parts[1]).to.be.a('string').and.not.empty;",
+											"             });",
+											"        }",
+											"    } else {",
+											"        console.warn(\"Could not find corpus name in response.\")",
+											"    }",
+											"} catch (e) {",
+											"    console.error(\"Error parsing response for corpus name:\", e);",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"corpus\": {\n    \"display_name\": \"My Research Papers Corpus\",\n    \"description\": \"A collection of papers on AI ethics.\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora"
+									]
+								},
+								"description": "Creates an empty Corpus.\n\nThe test script attempts to extract the `corpusName` (the ID part) from the response and save it as a collection variable.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora/create](https://ai.google.dev/api/rest/v1beta/corpora/create)"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Corpus",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}"
+									]
+								},
+								"description": "Gets information about a specific Corpus.\n\nRequires `{{corpusName}}` variable to be set.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora/get](https://ai.google.dev/api/rest/v1beta/corpora/get)"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Corpus",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"corpus\": {\n    \"display_name\": \"Updated Corpus Display Name\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}?updateMask=corpus.display_name",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}"
+									],
+									"query": [
+										{
+											"key": "updateMask",
+											"value": "corpus.display_name",
+											"description": "Specify fields to update (e.g., corpus.display_name, corpus.description)."
+										}
+									]
+								},
+								"description": "Updates the display name or description of a Corpus.\n\nUse `updateMask` to specify fields.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora/patch](https://ai.google.dev/api/rest/v1beta/corpora/patch)"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Corpus",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}?force=false",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}"
+									],
+									"query": [
+										{
+											"key": "force",
+											"value": "false",
+											"description": "Set to true to delete even if it contains documents."
+										}
+									]
+								},
+								"description": "Deletes a Corpus.\n\nSet `force=true` to delete a non-empty corpus.\n**Caution:** Irreversible.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora/delete](https://ai.google.dev/api/rest/v1beta/corpora/delete)"
+							},
+							"response": []
+						},
+						{
+							"name": "Query Corpus",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"What are the ethical implications of AI?\",\n  \"metadata_filters\": [\n    {\n      \"key\": \"year\",\n      \"conditions\": [\n        { \"numeric_value\": 2023, \"operation\": \"GREATER_EQUAL\" }\n      ]\n    }\n  ],\n  \"results_count\": 5\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}:query",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}:query"
+									]
+								},
+								"description": "Performs semantic search over an entire Corpus.\n\n*   Provide the search `query`.\n*   Optionally add `metadata_filters`.\n*   Specify `results_count`.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora/query](https://ai.google.dev/api/rest/v1beta/corpora/query)"
+							},
+							"response": []
+						}
+					],
+					"description": "Manage top-level Corpora (collections of documents)."
+				},
+				{
+					"name": "Documents",
+					"item": [
+						{
+							"name": "List Documents",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents?pageSize=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents"
+									],
+									"query": [
+										{
+											"key": "pageSize",
+											"value": "10"
+										}
+									]
+								},
+								"description": "Lists all Documents within a specific Corpus.\n\nRequires `{{corpusName}}`.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents/list](https://ai.google.dev/api/rest/v1beta/corpora.documents/list)"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Document",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Extract document ID for subsequent requests",
+											"try {",
+											"    const jsonData = pm.response.json();",
+											"    if (jsonData && jsonData.name) {",
+											"        // name is like 'corpora/corpus-id/documents/doc-id'",
+											"        const parts = jsonData.name.split('/'); ",
+											"        if (parts.length === 4) {",
+											"            pm.collectionVariables.set(\"documentId\", parts[3]);",
+											"            console.log(\"documentId variable set to:\", parts[3]);",
+											"            pm.test(\"Document ID Captured\", function() {",
+											"                 pm.expect(parts[3]).to.be.a('string').and.not.empty;",
+											"             });",
+											"        }",
+											"    } else {",
+											"        console.warn(\"Could not find document name in response.\")",
+											"    }",
+											"} catch (e) {",
+											"    console.error(\"Error parsing response for document ID:\", e);",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"document\": {\n    \"display_name\": \"AI Ethics Paper 1\",\n    \"custom_metadata\": [\n      {\n        \"key\": \"year\",\n        \"numeric_value\": 2023\n      },\n       {\n        \"key\": \"author\",\n        \"string_value\": \"Jane Doe\"\n      }\n    ]\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents"
+									]
+								},
+								"description": "Creates an empty Document within a Corpus.\n\nRequires `{{corpusName}}`.\nOptionally add `display_name` and `custom_metadata`.\nThe test script attempts to save the `documentId` variable.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents/create](https://ai.google.dev/api/rest/v1beta/corpora.documents/create)"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Document",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}"
+									]
+								},
+								"description": "Gets information about a specific Document.\n\nRequires `{{corpusName}}` and `{{documentId}}`.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents/get](https://ai.google.dev/api/rest/v1beta/corpora.documents/get)"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Document",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"document\": {\n    \"display_name\": \"Updated Document Title\",\n    \"custom_metadata\": [\n         {\n            \"key\": \"year\",\n            \"numeric_value\": 2024\n         }\n    ]\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}?updateMask=document.display_name,document.custom_metadata",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}"
+									],
+									"query": [
+										{
+											"key": "updateMask",
+											"value": "document.display_name,document.custom_metadata",
+											"description": "Specify fields to update."
+										}
+									]
+								},
+								"description": "Updates the display name or metadata of a Document.\n\nRequires `{{corpusName}}` and `{{documentId}}`.\nUse `updateMask`.\nUpdating metadata replaces *all* existing metadata.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents/patch](https://ai.google.dev/api/rest/v1beta/corpora.documents/patch)"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Document",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}?force=false",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}"
+									],
+									"query": [
+										{
+											"key": "force",
+											"value": "false",
+											"description": "Set to true to delete even if it contains chunks."
+										}
+									]
+								},
+								"description": "Deletes a Document.\n\nRequires `{{corpusName}}` and `{{documentId}}`.\nSet `force=true` to delete a non-empty document.\n**Caution:** Irreversible.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents/delete](https://ai.google.dev/api/rest/v1beta/corpora.documents/delete)"
+							},
+							"response": []
+						},
+						{
+							"name": "Query Document",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"query\": \"What is the conclusion of this paper?\",\n  \"results_count\": 3\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}:query",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}:query"
+									]
+								},
+								"description": "Performs semantic search over a specific Document.\n\nRequires `{{corpusName}}` and `{{documentId}}`.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents/query](https://ai.google.dev/api/rest/v1beta/corpora.documents/query)"
+							},
+							"response": []
+						}
+					],
+					"description": "Manage Documents within a Corpus."
+				},
+				{
+					"name": "Chunks",
+					"item": [
+						{
+							"name": "List Chunks",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}/chunks?pageSize=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}",
+										"chunks"
+									],
+									"query": [
+										{
+											"key": "pageSize",
+											"value": "10"
+										}
+									]
+								},
+								"description": "Lists all Chunks within a specific Document.\n\nRequires `{{corpusName}}` and `{{documentId}}`.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/list](https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/list)"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Chunk",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"// Extract chunk ID ",
+											"try {",
+											"    const jsonData = pm.response.json();",
+											"    if (jsonData && jsonData.name) {",
+											"        // name is like 'corpora/corpus-id/documents/doc-id/chunks/chunk-id'",
+											"        const parts = jsonData.name.split('/'); ",
+											"        if (parts.length === 6) {",
+											"            pm.collectionVariables.set(\"chunkId\", parts[5]);",
+											"            console.log(\"chunkId variable set to:\", parts[5]);",
+											"            pm.test(\"Chunk ID Captured\", function() {",
+											"                 pm.expect(parts[5]).to.be.a('string').and.not.empty;",
+											"             });",
+											"        }",
+											"    } else {",
+											"        console.warn(\"Could not find chunk name in response.\")",
+											"    }",
+											"} catch (e) {",
+											"    console.error(\"Error parsing response for chunk ID:\", e);",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"chunk\": {\n    \"data\": {\n        \"string_value\": \"This is the first chunk of text from the document. It discusses the introduction.\"\n    },\n    \"custom_metadata\": [\n         {\n            \"key\": \"section\",\n            \"string_value\": \"introduction\"\n         }\n    ]\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}/chunks",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}",
+										"chunks"
+									]
+								},
+								"description": "Creates a single Chunk within a Document.\n\nRequires `{{corpusName}}` and `{{documentId}}`.\nThe test script attempts to save the `chunkId` variable.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/create](https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/create)"
+							},
+							"response": []
+						},
+						{
+							"name": "Batch Create Chunks",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"requests\": [\n    {\n      \"parent\": \"corpora/{{corpusName}}/documents/{{documentId}}\",\n      \"chunk\": {\n         \"data\": {\"string_value\": \"This is the second chunk, covering methodology.\"},\n         \"custom_metadata\": [{\"key\": \"section\", \"string_value\": \"methodology\"}]\n       }\n    },\n     {\n      \"parent\": \"corpora/{{corpusName}}/documents/{{documentId}}\",\n      \"chunk\": {\n         \"data\": {\"string_value\": \"The third chunk details the results.\"},\n         \"custom_metadata\": [{\"key\": \"section\", \"string_value\": \"results\"}]\n       }\n    }\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}/chunks:batchCreate",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}",
+										"chunks:batchCreate"
+									]
+								},
+								"description": "Creates multiple Chunks within a Document in one request.\n\nRequires `{{corpusName}}` and `{{documentId}}`.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/batchCreate](https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/batchCreate)"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Chunk",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}/chunks/{{chunkId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}",
+										"chunks",
+										"{{chunkId}}"
+									]
+								},
+								"description": "Gets information about a specific Chunk.\n\nRequires `{{corpusName}}`, `{{documentId}}`, and `{{chunkId}}`.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/get](https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/get)"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Chunk",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"chunk\": {\n      \"data\": {\n          \"string_value\": \"This is the updated text for the first chunk.\"\n      },\n       \"custom_metadata\": [\n         {\n            \"key\": \"section\",\n            \"string_value\": \"introduction_v2\"\n         }\n      ]\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}/chunks/{{chunkId}}?updateMask=chunk.data,chunk.custom_metadata",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}",
+										"chunks",
+										"{{chunkId}}"
+									],
+									"query": [
+										{
+											"key": "updateMask",
+											"value": "chunk.data,chunk.custom_metadata",
+											"description": "Specify fields to update."
+										}
+									]
+								},
+								"description": "Updates the data or metadata of a single Chunk.\n\nRequires `{{corpusName}}`, `{{documentId}}`, and `{{chunkId}}`.\nUse `updateMask`.\nUpdating metadata replaces *all* existing metadata.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/patch](https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/patch)"
+							},
+							"response": []
+						},
+						{
+							"name": "Batch Update Chunks",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"requests\": [\n    {\n      \"name\": \"corpora/{{corpusName}}/documents/{{documentId}}/chunks/{{chunkId}}\", \n      \"chunk\": {\n         \"data\": {\"string_value\": \"Updated second chunk text.\"}\n       },\n       \"update_mask\": { \"paths\": [\"chunk.data\"] }\n    },\n     {\n      \"name\": \"corpora/{{corpusName}}/documents/{{documentId}}/chunks/ANOTHER_CHUNK_ID\", \n      \"chunk\": {\n         \"custom_metadata\": [{\"key\": \"section\", \"string_value\": \"results_v2\"}]\n       },\n       \"update_mask\": { \"paths\": [\"chunk.custom_metadata\"] }\n    }\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}/chunks:batchUpdate",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}",
+										"chunks:batchUpdate"
+									]
+								},
+								"description": "Updates multiple Chunks within a Document in one request.\n\nRequires `{{corpusName}}` and `{{documentId}}`. You must specify the full `name` (including the chunk ID) for each chunk being updated in the `requests` array.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/batchUpdate](https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/batchUpdate)"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Chunk",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}/chunks/{{chunkId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}",
+										"chunks",
+										"{{chunkId}}"
+									]
+								},
+								"description": "Deletes a single Chunk.\n\nRequires `{{corpusName}}`, `{{documentId}}`, and `{{chunkId}}`.\n**Caution:** Irreversible.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/delete](https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/delete)"
+							},
+							"response": []
+						},
+						{
+							"name": "Batch Delete Chunks",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"requests\": [\n    {\n      \"name\": \"corpora/{{corpusName}}/documents/{{documentId}}/chunks/{{chunkId}}\"\n    },\n    {\n       \"name\": \"corpora/{{corpusName}}/documents/{{documentId}}/chunks/ANOTHER_CHUNK_ID_TO_DELETE\"\n    }\n  ]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/documents/{{documentId}}/chunks:batchDelete",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"documents",
+										"{{documentId}}",
+										"chunks:batchDelete"
+									]
+								},
+								"description": "Deletes multiple Chunks within a Document in one request.\n\nRequires `{{corpusName}}` and `{{documentId}}`. Specify the full `name` (including chunk ID) for each chunk to delete.\n**Caution:** Irreversible.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/batchDelete](https://ai.google.dev/api/rest/v1beta/corpora.documents.chunks/batchDelete)"
+							},
+							"response": []
+						}
+					],
+					"description": "Manage Chunks (pieces of text/data) within a Document."
+				},
+				{
+					"name": "Permissions (Corpora)",
+					"item": [
+						{
+							"name": "List Permissions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/permissions?pageSize=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"permissions"
+									],
+									"query": [
+										{
+											"key": "pageSize",
+											"value": "10"
+										}
+									]
+								},
+								"description": "Lists permissions for a specific Corpus.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.permissions/list](https://ai.google.dev/api/rest/v1beta/corpora.permissions/list)"
+							},
+							"response": []
+						},
+						{
+							"name": "Create Permission",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"permission\": {\n    \"grantee_type\": \"EVERYONE\",\n    \"role\": \"READER\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/permissions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"permissions"
+									]
+								},
+								"description": "Creates a permission for a specific Corpus.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.permissions/create](https://ai.google.dev/api/rest/v1beta/corpora.permissions/create)"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Permission",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/permissions/{{permissionId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"permissions",
+										"{{permissionId}}"
+									]
+								},
+								"description": "Gets details about a specific permission on a Corpus.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.permissions/get](https://ai.google.dev/api/rest/v1beta/corpora.permissions/get)"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Permission",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"permission\": {\n     \"role\": \"WRITER\" \n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/permissions/{{permissionId}}?updateMask=permission.role",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"permissions",
+										"{{permissionId}}"
+									],
+									"query": [
+										{
+											"key": "updateMask",
+											"value": "permission.role"
+										}
+									]
+								},
+								"description": "Updates the role of an existing permission on a Corpus.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.permissions/patch](https://ai.google.dev/api/rest/v1beta/corpora.permissions/patch)"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Permission",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/{{version}}/corpora/{{corpusName}}/permissions/{{permissionId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"{{version}}",
+										"corpora",
+										"{{corpusName}}",
+										"permissions",
+										"{{permissionId}}"
+									]
+								},
+								"description": "Deletes a specific permission from a Corpus.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/corpora.permissions/delete](https://ai.google.dev/api/rest/v1beta/corpora.permissions/delete)"
+							},
+							"response": []
+						}
+					],
+					"description": "Manage access permissions for Corpora."
+				}
+			],
+			"description": "Create and manage Corpora, Documents, and Chunks for Retrieval Augmented Generation (RAG) and semantic search."
+		},
+		{
+			"name": "Cached Content API",
+			"item": [
+				{
+					"name": "List Cached Contents",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/cachedContents?pageSize=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"cachedContents"
+							],
+							"query": [
+								{
+									"key": "pageSize",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lists CachedContent resources available to the user.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/cachedContents/list](https://ai.google.dev/api/rest/v1beta/cachedContents/list)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Cached Content",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"// Extract cached content ID ",
+									"try {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData && jsonData.name) {",
+									"        // name is like 'cachedContents/cached-content-id'",
+									"        const parts = jsonData.name.split('/'); ",
+									"        if (parts.length === 2) {",
+									"            pm.collectionVariables.set(\"cachedContentId\", parts[1]);",
+									"            console.log(\"cachedContentId variable set to:\", parts[1]);",
+									"            pm.test(\"Cached Content ID Captured\", function() {",
+									"                 pm.expect(parts[1]).to.be.a('string').and.not.empty;",
+									"             });",
+									"        }",
+									"    } else {",
+									"        console.warn(\"Could not find cached content name in response.\")",
+									"    }",
+									"} catch (e) {",
+									"    console.error(\"Error parsing response for cached content ID:\", e);",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cached_content\": {\n    \"model\": \"models/gemini-1.5-pro-latest\",\n    \"contents\": [\n        {\n           \"role\": \"system\",\n            \"parts\": [\n                {\"text\": \"You are a helpful assistant that provides concise answers based on the following document.\"}\n            ]\n        },\n        {\n             \"role\": \"user\",\n             \"parts\": [\n                 {\"file_data\": {\n                     \"file_uri\": \"{{fileUri}}\", \n                     \"mime_type\": \"application/pdf\"\n                 }}\n             ]\n        },\n         {\n             \"role\": \"model\",\n             \"parts\": [\n                 {\"text\": \"Okay, I have read the document. How can I help?\"}\n             ]\n        }\n    ],\n    \"display_name\": \"My Cached Document Prompt\",\n    \"ttl\": \"3600s\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/cachedContents",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"cachedContents"
+							]
+						},
+						"description": "Creates a CachedContent resource by pre-processing large, static parts of a prompt.\n\n*   The `model` specified here **must** match the model used when generating content with this cache later.\n*   The `contents` array holds the prompt parts to be cached (e.g., system instructions, large file references).\n*   Requires a `fileUri` from a previously uploaded file if caching file content.\n*   Set `ttl` (time-to-live) for the cache.\n\n**Note:** Using cached content can reduce latency and cost for subsequent `generateContent` calls that use the same initial content.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/cachedContents/create](https://ai.google.dev/api/rest/v1beta/cachedContents/create)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Cached Content",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/cachedContents/{{cachedContentId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"cachedContents",
+								"{{cachedContentId}}"
+							]
+						},
+						"description": "Gets metadata about a specific CachedContent resource.\n\nRequires `{{cachedContentId}}`.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/cachedContents/get](https://ai.google.dev/api/rest/v1beta/cachedContents/get)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Cached Content",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cached_content\": {\n    \"ttl\": \"7200s\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/cachedContents/{{cachedContentId}}?updateMask=cached_content.ttl",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"cachedContents",
+								"{{cachedContentId}}"
+							],
+							"query": [
+								{
+									"key": "updateMask",
+									"value": "cached_content.ttl",
+									"description": "Specify fields to update (e.g., cached_content.ttl)."
+								}
+							]
+						},
+						"description": "Updates the time-to-live (TTL) of a CachedContent resource.\n\nRequires `{{cachedContentId}}`.\nUse `updateMask`.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/cachedContents/patch](https://ai.google.dev/api/rest/v1beta/cachedContents/patch)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Cached Content",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/cachedContents/{{cachedContentId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"cachedContents",
+								"{{cachedContentId}}"
+							]
+						},
+						"description": "Deletes a CachedContent resource.\n\nRequires `{{cachedContentId}}`.\n**Caution:** Irreversible.\n\n**Official Docs:** [https://ai.google.dev/api/rest/v1beta/cachedContents/delete](https://ai.google.dev/api/rest/v1beta/cachedContents/delete)"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Content (Using Cache)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contents\": [\n        {\n           \"role\": \"user\",\n            \"parts\": [\n                {\"text\": \"Summarize the introduction section of the document.\"}\n            ]\n        }\n    ],\n    \"generationConfig\": {\n        \"temperature\": 0.5,\n        \"maxOutputTokens\": 256\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/{{version}}/cachedContents/{{cachedContentId}}:generateContent",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"{{version}}",
+								"cachedContents",
+								"{{cachedContentId}}:generateContent"
+							]
+						},
+						"description": "Generates content using a previously created CachedContent resource.\n\n*   The URL includes the `cachedContentId`.\n*   The `contents` array in the request body should **only** contain the *new* parts of the prompt (i.e., the parts *not* included when the cache was created).\n*   The model used for generation is implicitly the one specified when the cache was created.\n\n**Official Docs:** (Refer to generateContent, noting the different URL structure using cached content)\n[https://ai.google.dev/api/rest/v1beta/models/generateContent](https://ai.google.dev/api/rest/v1beta/models/generateContent)"
+					},
+					"response": []
+				}
+			],
+			"description": "Create and manage CachedContent for potentially faster and cheaper generation with large, static prompts/content (e.g., system instructions, long documents)."
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "key",
+				"value": "key",
+				"type": "string"
+			},
+			{
+				"key": "value",
+				"value": "{{vault:geminiApiKey}}",
+				"type": "string"
+			},
+			{
+				"key": "in",
+				"value": "query",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://generativelanguage.googleapis.com",
+			"type": "string"
+		},
+		{
+			"key": "version",
+			"value": "v1beta",
+			"type": "string"
+		},
+		{
+			"key": "model",
+			"value": "gemini-1.5-flash-latest",
+			"type": "string"
+		},
+		{
+			"key": "embeddingModel",
+			"value": "text-embedding-004",
+			"type": "string"
+		},
+		{
+			"key": "aqaModel",
+			"value": "gemini-1.5-flash-aqa",
+			"type": "string"
+		},
+		{
+			"key": "tunedModelName",
+			"value": "YOUR_TUNED_MODEL_ID",
+			"type": "string"
+		},
+		{
+			"key": "uploadUrl",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "fileUri",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "fileId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "corpusName",
+			"value": "YOUR_CORPUS_ID",
+			"type": "string"
+		},
+		{
+			"key": "documentId",
+			"value": "YOUR_DOCUMENT_ID",
+			"type": "string"
+		},
+		{
+			"key": "chunkId",
+			"value": "YOUR_CHUNK_ID",
+			"type": "string"
+		},
+		{
+			"key": "permissionId",
+			"value": "everyone",
+			"type": "string"
+		},
+		{
+			"key": "cachedContentId",
+			"value": "YOUR_CACHED_CONTENT_ID",
+			"type": "string"
+		}
+	]
+}
